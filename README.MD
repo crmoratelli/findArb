@@ -1,43 +1,72 @@
-# Introdução
-Este é um projeto open-source para busca de pares de arbitragem entre exchanges.
+# Projeto de Arbitragem entre Exchanges - Open Source
 
-Seu objetivo é compreensão da estrutura de mercado e comportamento dos preços de ativos entre exchanges. Use por sua conta de risco. O autor não se responsabiliza por qualquais danos ou problemas decorrentes de seu uso. 
+Este projeto open-source visa facilitar a busca por oportunidades de arbitragem entre diferentes exchanges de criptomoedas. Ele analisa a estrutura de mercado e o comportamento dos preços dos ativos, utilizando a biblioteca `ccxt`, que suporta uma ampla gama de exchanges (a lista completa está disponível em [CCXT - Exchanges](https://docs.ccxt.com/#/?id=exchanges)).
 
-Ele usa o lib ccxt, desta forma, é compatível com um grande número de corretas. A lista pode ser contrada aqui: https://docs.ccxt.com/#/?id=exchanges
+## Aviso
+Este software é fornecido "como está", sem garantia de qualquer tipo. Use por sua conta e risco. O autor não se responsabiliza por quaisquer danos ou problemas que possam surgir do uso deste software.
 
-# Funcionamento
+## Funcionamento
+O software opera baseado em uma lista de exchanges e uma lista de símbolos, calculando oportunidades de arbitragem ao cruzar os dados obtidos. O processo envolve a análise dos livros de ordem das exchanges para avaliar a liquidez disponível. Por exemplo, se o usuário deseja realizar arbitragem com até USD 1.000 e busca um lucro mínimo de 2%, o software calculará o preço médio de compra necessário para alcançar este limite ou a margem de lucro. Ao final, ele apresenta uma tabela com todas as oportunidades identificadas.
 
-Baseado em uma lista de exchanges e uma lista de símbolos o software calcula oportunidades de arbitragem cruzando os dados das exchanges. Isso é feito olhando o livro de ordem das exchanges e analizando a liquidez disponível no momento. Por exemplo, o usuário informa que pretende arbitrar com até U$1000 e requer ao menos 2% de lucro, o software calcula o preço médio de compra no livro de ordens até atingir o limite de U$1000 ou a porcentagem de lucro miníma de 2%. Ao final da execução, ele informa uma tabela com todas as oportunidades encontradas. 
-
-# Execução
-
-```
+## Instalação e Execução
+```bash
 python -m venv .env
-pip install -r requirements.txt
 source .env/bin/activate
+pip install -r requirements.txt
 python findArb.py
 ```
 
-O software vem com um arquivo de configuração pronto para uso veja em `configs/findArb.conf` e uma lista de símbolos por exchange que pode ser visto em `configs/pairs.json`.
+O software vem com um arquivo de configuração pronto para uso (`configs/findArb.conf`) e uma lista de símbolos por exchange que pode ser visto em (`configs/pairs.json`).
 
-# Organização
+# Configuração e Organização do Projeto de Arbitragem
 
-Os seguintes scripts compõe esta aplicação:
+Este software inclui arquivos de configuração prontos para uso, facilitando a inicialização e personalização conforme necessário.
 
-- `findArb.py`: executa busca por arbitragem nas exchanges configuradas.
-- `findCoins.py`: busca e configura lista de cryptos disponível nas exchanges configuradas.
-- `exArb.py`: executa arbitragem entre duas exchanges, mas ainda não foi completamente testado.
-- `helpers.py`: funcões adicionais usadas em mais de um script.
-- `configs/`: diretório com arquivos de configuração. 
+## Arquivos de Configuração
+- `configs/findArb.conf`: Configurações principais para a busca de arbitragem.
+- `configs/pairs.json`: Lista de pares de criptomoedas disponíveis por exchange.
 
-# Configurações Básicas
+## Estrutura dos Scripts
+O projeto é composto pelos seguintes scripts, cada um com uma função específica dentro do sistema de arbitragem:
+- `findArb.py`: Realiza a busca por arbitragem nas exchanges configuradas.
+- `findCoins.py`: Busca e configura a lista de criptomoedas disponíveis nas exchanges.
+- `exArb.py`: Executa arbitragem entre duas exchanges específicas (em fase de testes).
+- `helpers.py`: Contém funções auxiliares usadas em vários scripts.
+- `configs/`: Diretório que armazena os arquivos de configuração do projeto.
 
-Informe as exchanges desejadas `configs/findArb.conf`. Para cada exchange, é necessário informar uma lista de símbolos em `configs/pairs.conf`.
+## Configurações Básicas
+Para configurar o software, edite o arquivo `configs/findArb.conf` com os seguintes parâmetros:
+- `minimal_profit`: Define a porcentagem mínima de lucro esperada para cada operação de arbitragem.
+- `max_profit`: Estabelece um limite máximo de lucro para evitar resultados distorcidos por pares de moedas homônimos em contratos diferentes.
+- `max_amount`: Especifica o valor máximo que pode ser utilizado em operações de arbitragem.
 
-No arquivo configs/findArb.conf você pode tunar sua busca alterando as seguintes variáveis:
+### Configuração de Pares e Exchanges
+Em `configs/pairs.conf`, você deve listar os símbolos para cada exchange que deseja monitorar. Isso permite ao software calcular as oportunidades de arbitragem mais eficientemente.
 
-- `minimal_profit`: porcentagem mínima de lucro em uma arbitragem.
-- `max_profit`: máximo de lucro em uma arbitragem. A intenção disso é filtrar símbolos de contrados diferentes com o mesmo nome, a diferença de preço polui a saída com valores de lucro irreais. 
-- `max_amount`: valor máximo disponível para arbitragem.
+# Exemplo de Saída
+
+`Source` é onde você deve comprar o ativo e `Destination` é onde deve vendê-lo. `Av. Price` é o preço médio que você pagará pelo ativo adquirindo a quantidade da coluna `Available`. Na venda, obterá a porcentagem de lucro `Price Difference`.
+
+```
+Symbol      Source         Av. Price  Destination         Av. Price    Available (USDT)    Price Difference(%)
+----------  --------  --------------  -------------  --------------  ------------------  ---------------------
+ETH/USDT    bitstamp   3042.89        upbit           3054.28                      1000            0.374444
+KAS/USDT    gate          0.113509    bybit              0.113547                  1000            0.0338885
+BTC/USDT    okx       62945           huobi          62948                         1000            0.00470252
+BNB/USDT    okx         580.604       hitbtc           580.694                     1000            0.0154406
+SOL/USDT    okx         150.18        huobi            150.293                     1000            0.0751012
+LINK/USDT   okx          14.1996      gate              14.2016                    1000            0.0138734
+MATIC/USDT  okx           0.700991    huobi              0.701294                  1000            0.0431473
+DOT/USDT    okx           7.078       gate               7.08091                   1000            0.0411316
+SHIB/USDT   okx           2.3219e-05  gate               2.3228e-05                1000            0.0387614
+ATOM/USDT   okx           9.09458     bybit              9.09464                   1000            0.000741393
+Execution time: 40.34578490257263
+```
+
+
+## Contribuindo
+Contribuições para melhorar o software são sempre bem-vindas. Se você tem melhorias, correções ou novas funcionalidades, sinta-se livre para enviar um pull request ou abrir uma issue no repositório do GitHub.
+
+
 
 
